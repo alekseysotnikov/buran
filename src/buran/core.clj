@@ -7,6 +7,7 @@
 
 
 (defn consume [{:keys [from validate locale xml-healer-on allow-doctypes]
+                :as source
                 :or   {validate       false
                        locale         (Locale/US)
                        xml-healer-on  true
@@ -24,6 +25,7 @@
                    (SyndFeedInput. validate locale)
                    (.setAllowDoctypes allow-doctypes)
                    (.setXmlHealerOn xml-healer-on))
+        from     (if (string? source) source from)
         from     (if (string? from) (File. from) from)]
     (feed->clj (.build consumer from))))
 
