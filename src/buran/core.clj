@@ -34,10 +34,10 @@
                      :or   {default-encoding "US-ASCII"
                             lenient          true}}]
   "
-  from - http url string, URL, File, InputStream
+  from - <http url string>, URL, File, InputStream
   headers - request's HTTP headers map
-  lenient - indicates if the charset encoding detection should be relaxed. Default true
-  default-encoding - default US-ASCII. Supported: UTF-8, UTF-16, UTF-16BE, UTF-16LE, CP1047, US-ASCII
+  lenient - indicates if the charset encoding detection should be relaxed
+  default-encoding - UTF-8, UTF-16, UTF-16BE, UTF-16LE, CP1047, US-ASCII
   "
   (cond
     (instance? File from) (XmlReader. from)
@@ -59,13 +59,19 @@
 (defn produce [{:keys [feed to pretty-print]
                 :or   {to           :string
                        pretty-print true}}]
+  "
+  feed - a feed to generate
+  to - <file path string>, :string, :w3cdom, :jdom, File, Writer
+  pretty-print - pretty-print XML output
+  "
   (let [producer (SyndFeedOutput.)
         feed     (clj->feed feed)]
     (cond
-      (= :string to) (.outputString producer feed pretty-print)
-      (= :w3cdom to) (.outputW3CDom producer feed)
-      (= :jdom to) (.outputJDom producer feed)
-      (or (instance? File to) (.output producer feed to pretty-print)
+      (= :string to)             (.outputString producer feed pretty-print)
+      (= :w3cdom to)             (.outputW3CDom producer feed)
+      (= :jdom to)               (.outputJDom producer feed)
+      (string? to)               (.output producer feed (File. to) pretty-print)
+      (or (instance? File to)
           (instance? Writer to)) (.output producer feed to pretty-print))))
 
 
