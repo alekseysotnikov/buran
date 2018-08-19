@@ -15,4 +15,4 @@ FIXME
 
 Copyright © 2018 Aleksei Sotnikov
 
-Distributed under the Eclipse Public License either version 2.0
+Distributed under the Eclipse Public License version 2.0

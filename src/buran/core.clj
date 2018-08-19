@@ -13,7 +13,7 @@
                        xml-healer-on  true
                        allow-doctypes false}}]
   "
-  from  - file path string, File, Reader, W3C DOM document, JDOM document, W3C SAX InputSource
+  from  - <file path string>, File, Reader, W3C DOM document, JDOM document, W3C SAX InputSource
   validate - indicates if the input should be validated.
   locale - java.util.Locale
   xml-healer-on - Healing trims leading chars from the stream (empty spaces and comments) until the XML prolog.
@@ -40,11 +40,10 @@
   default-encoding - UTF-8, UTF-16, UTF-16BE, UTF-16LE, CP1047, US-ASCII
   "
   (cond
-    (instance? File from) (XmlReader. from)
-    (instance? InputStream from) (XmlReader. from (:content-type headers) lenient default-encoding)
-    :url (let [url  (if (instance? URL from) from (URL. from))
-               from (.openConnection url)]
-           (XmlReader. from headers))))
+    (instance? String from)      (XmlReader. (.openConnection (URL. from)) headers)
+    (instance? URL from)         (XmlReader. (.openConnection from) headers)
+    (instance? File from)        (XmlReader. from)
+    (instance? InputStream from) (XmlReader. from (:content-type headers) lenient default-encoding)))
 
 
 (defn consume-http [request]
