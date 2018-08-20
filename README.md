@@ -4,6 +4,8 @@
 [![CircleCI](https://circleci.com/gh/alekseysotnikov/buran.svg?style=shield)](https://circleci.com/gh/alekseysotnikov/buran)
 [![codecov](https://codecov.io/gh/alekseysotnikov/buran/branch/master/graph/badge.svg)](https://codecov.io/gh/alekseysotnikov/buran)
 
+![](pic/buran.png)
+
 Buran is a library designed to consume and produce RSS/Atom feeds by using data-driven approach.
 It works as [ROME](https://rometools.github.io/rome/) wrapper but in Buran, feeds are just data structures. 
 
