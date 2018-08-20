@@ -17,7 +17,7 @@
                        allow-doctypes false}}]
   "
   from  - <file path string>, File, Reader, W3C DOM document, JDOM document, W3C SAX InputSource
-  validate - indicates if the input should be validated.
+  validate - indicates if the input should be validated
   locale - java.util.Locale
   xml-healer-on - Healing trims leading chars from the stream (empty spaces and comments) until the XML prolog.
                   Healing resolves HTML entities (from literal to code number) in the reader.
@@ -84,7 +84,7 @@
 
 (defn combine-feeds [feed & feeds]
   "Combine entries of feeds, put into the first one feed and return it"
-  (assoc feed :entries (lazy-seq (apply concat (map :entries feeds)))))
+  (assoc feed :entries (lazy-seq (apply concat (map :entries (cons feed feeds))))))
 
 
 (defn sort-entries-by
