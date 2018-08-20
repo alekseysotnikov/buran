@@ -14,7 +14,18 @@ After the modifications, Buran can generate from it your own feed, for example i
 
 ### Installation
 
-Add to *project.clj* - ```[buran "0.1.0"]```
+1. Add to *project.clj* - ```[buran "0.1.0"]```
+
+2. Import 
+
+in your namespace
+```clojure
+(:require [buran.core :refer :all])
+```
+or
+````clojure
+(require '[buran.core :refer :all])
+````
 
 ## Usage
 
