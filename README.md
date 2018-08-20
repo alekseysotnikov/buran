@@ -10,7 +10,7 @@ Buran is a library designed to consume and produce RSS/Atom feeds by using data-
 It works as [ROME](https://rometools.github.io/rome/) wrapper but in Buran, feeds are just data structures. 
 
 Buran could be used as an aggregator of vary feed formats into regular Clojure data structures. If you consume a feed, Buran creates a hashmap. Thus all you have to do is either read or manipulate the hashmap as you wish using regular functions like ```filter```, ```sort```, ```assoc```, ```dissoc``` and so on. 
-After the modifications, Buran can generate from it your own feed in a different format for example.
+After the modifications, Buran can generate from it your own feed, for example in a different format (RSS 2.0, 1.0, 0.9x or Atom 1.0, 0.3).
 
 ### Installation
 
@@ -18,7 +18,7 @@ Add to *project.clj* - ```[buran "0.1.0"]```
 
 ## Usage
 
-No matter with which format of feed you work, no matter you want to consume a feed or produce a new one. 
+No matter with which format of a feed you work, no matter you want to consume a feed or produce a new one. 
 Every time you work with the same data structure.
 
 ### examples
@@ -88,11 +88,11 @@ Consume a feed over http
                           "[Element: <creativeCommons:license [Namespace: http://backend.userland.com/creativeCommonsRssModule]/>]"]]}
 ````
 
-Produce a feed to string
+Produce a feed
 
 ````clojure
-(produce {:info   {:feed-type "atom_1.0"
-                   :title     "Feed title"}
+(produce {:info    {:feed-type "atom_1.0"
+                    :title     "Feed title"}
           :entries [{:title       "Entry title"
                      :description {:value "entry description"}}]})
 =>
@@ -125,27 +125,29 @@ Produce a feed to string
 ````
 
 ````clojure
-(consume-http {:from             "https://stackoverflow.com/feeds/tag?tagnames=clojure" ; <http url string>, URL, File, InputStream
+(consume-http {:from             "https://stackoverflow.com/feeds/tag?tagnames=clojure" 
+                                                      ; <http url string>, URL, File, InputStream
                :headers          {"X-Header" "Value"} ; request's HTTP headers map
-               :lenient          true ; indicates if the charset encoding detection should be relaxed
-               :default-encoding "US-ASCII" ; UTF-8, UTF-16, UTF-16BE, UTF-16LE, CP1047, US-ASCII
+               :lenient          true                 ; indicates if the charset encoding detection should be relaxed
+               :default-encoding "US-ASCII"           ; supported: UTF-8, UTF-16, UTF-16BE, UTF-16LE, CP1047, US-ASCII
               })
-; 
-; 
 ````
 *Beware!* ```consume-http``` from either http url string or URL is rudimentary and works only for simplest cases. For instance, it does not follow HTTP 302 redirects.
 Please consider using a separate library like [clj-http](https://github.com/dakrone/clj-http) or [http-kit](http://www.http-kit.org/client.html) for fetching the feed.
 
 ````clojure
-(produce {:to :string        ; <file path string>, :string, :w3cdom, :jdom, File, Writer
-          :pretty-print true ; pretty-print XML output
-          :feed {:info {:feed-type "atom_1.0" ; supports: atom_1.0, atom_0.3, rss_2.0, rss_1.0, rss_0.94, rss_0.93, rss_0.92, rss_0.91U (Userland), rss_0.91N (Netscape), rss_0.9
-                        :title "Feed title"}
-                 :entries [{:title       "Entry 1 title"
-                            :description {:value "entry description"}}
-                           {:title       "Entry 2 title"
-                            :description {:value "entry description"}}]
-                 :foreign-markup nil}
+(produce {:to           :string ; <file path string>, :string, :w3cdom, :jdom, File, Writer
+          :pretty-print true    ; pretty-print XML output
+          :feed         {:info {:feed-type "atom_1.0" ; supports: atom_1.0, atom_0.3, rss_2.0, 
+                                                      ; rss_1.0, rss_0.94, rss_0.93, rss_0.92, 
+                                                      ; rss_0.91U (Userland), rss_0.91N (Netscape), 
+                                                      ; rss_0.9
+                                :title "Feed title"}
+                         :entries [{:title       "Entry 1 title"
+                                    :description {:value "entry description"}}
+                                   {:title       "Entry 2 title"
+                                    :description {:value "entry description"}}]
+                         :foreign-markup nil}
          })
 ````
  
