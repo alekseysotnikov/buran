@@ -21,12 +21,12 @@ Every time you work with the same data structure.
 
 ### examples
 
-Consume feed from file
+Consume a feed from file
 ````clojure
 (consume "~/feed.xml")
 ````
 
-Consume feed over http
+Consume a feed over http
 
 ````clojure
 (consume-http "https://stackoverflow.com/feeds/tag?tagnames=clojure")
@@ -86,7 +86,30 @@ Consume feed over http
                           "[Element: <creativeCommons:license [Namespace: http://backend.userland.com/creativeCommonsRssModule]/>]"]]}
 ````
 
-Various options
+Produce a feed to string
+
+````clojure
+(produce {:info   {:feed-type "atom_1.0"
+                   :title     "Feed title"}
+          :entries [{:title       "Entry title"
+                     :description {:value "entry description"}}]})
+=>
+"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r
+ <feed xmlns=\"http://www.w3.org/2005/Atom\">\r
+   <title>Feed title</title>\r
+   <subtitle />\r
+   <entry>\r
+     <title>Entry title</title>\r
+     <author>\r
+       <name />\r
+     </author>\r
+     <summary>entry description</summary>\r
+   </entry>\r
+ </feed>\r
+ "
+````
+
+### Various options
 
 ````clojure
 (consume {:from           "~/feed.xml" ; <file path string>, File, Reader, W3C DOM document, JDOM document, W3C SAX InputSource
