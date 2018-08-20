@@ -6,6 +6,9 @@
            [java.io File Writer InputStream]))
 
 
+;; App API
+
+
 (defn consume [{:keys [from validate locale xml-healer-on allow-doctypes]
                 :as source
                 :or   {validate       false
@@ -21,12 +24,12 @@
                   The healing is done only with the File and Reader.
   allow-doctypes - you should only activate it when the feeds that you process are absolutely trustful
   "
-  (let [consumer (doto
+  (let [from     (if (string? source) source from)
+        from     (if (string? from) (File. from) from)
+        consumer (doto
                    (SyndFeedInput. validate locale)
                    (.setAllowDoctypes allow-doctypes)
-                   (.setXmlHealerOn xml-healer-on))
-        from     (if (string? source) source from)
-        from     (if (string? from) (File. from) from)]
+                   (.setXmlHealerOn xml-healer-on))]
     (feed->clj (.build consumer from))))
 
 
@@ -56,6 +59,7 @@
 
 
 (defn produce [{:keys [feed to pretty-print]
+                :as   feed-as-arg
                 :or   {to           :string
                        pretty-print true}}]
   "
@@ -63,20 +67,24 @@
   to - <file path string>, :string, :w3cdom, :jdom, File, Writer
   pretty-print - pretty-print XML output
   "
-  (let [producer (SyndFeedOutput.)
-        feed     (clj->feed feed)]
+  (let [feed     (if (nil? feed) feed-as-arg feed)
+        feed     (clj->feed feed)
+        producer (SyndFeedOutput.)]
     (cond
-      (= :string to)             (.outputString producer feed pretty-print)
-      (= :w3cdom to)             (.outputW3CDom producer feed)
-      (= :jdom to)               (.outputJDom producer feed)
-      (string? to)               (.output producer feed (File. to) pretty-print)
+      (= :string to) (.outputString producer feed pretty-print)
+      (= :w3cdom to) (.outputW3CDom producer feed)
+      (= :jdom to) (.outputJDom producer feed)
+      (string? to) (.output producer feed (File. to) pretty-print)
       (or (instance? File to)
           (instance? Writer to)) (.output producer feed to pretty-print))))
 
 
-(defn combine-feeds [& feeds]
-  "Combine entries of feeds into the first one feed"
-  (assoc (first feeds) :entries (lazy-seq (apply concat (map :entries feeds)))))
+;; Utilities
+
+
+(defn combine-feeds [feed & feeds]
+  "Combine entries of feeds, put into the first one feed and return it"
+  (assoc feed :entries (lazy-seq (apply concat (map :entries feeds)))))
 
 
 (defn sort-entries-by

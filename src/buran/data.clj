@@ -156,23 +156,26 @@
 
 
 (defn ^SyndEntry clj->entry [m]
-  (doto
-    (SyndEntryImpl.)
-    (.setUpdatedDate    (:updated-date m))
-    (.setTitle          (:title m))
-    (.setForeignMarkup  (:foreign-markup m))
-    (.setCategories     (map clj->category (:categories m)))
-    (.setComments       (:comments m))
-    (.setContributors   (map clj->person (:contributors m)))
-    (.setContents       (map clj->content (:contents m)))
-    (.setPublishedDate  (:published-date m))
-    (.setUri            (:uri m))
-    (.setLinks          (map clj->link (:links m)))
-    (.setAuthor         (:author m))
-    (.setDescription    (when-let [r (:description m)] (clj->content r)))
-    (.setAuthors        (map clj->person (:authors m)))
-    (.setLink           (:link m))
-    (.setEnclosures     (map clj->enclosure (:enclosures m)))))
+  (let [entry (doto
+                (SyndEntryImpl.)
+                (.setTitle (:title m))
+                (.setForeignMarkup (:foreign-markup m))
+                (.setCategories (map clj->category (:categories m)))
+                (.setComments (:comments m))
+                (.setContributors (map clj->person (:contributors m)))
+                (.setContents (map clj->content (:contents m)))
+                (.setPublishedDate (:published-date m))
+                (.setUri (:uri m))
+                (.setLinks (map clj->link (:links m)))
+                (.setAuthor (:author m))
+                (.setDescription (when-let [r (:description m)] (clj->content r)))
+                (.setAuthors (map clj->person (:authors m)))
+                (.setLink (:link m))
+                (.setEnclosures (map clj->enclosure (:enclosures m))))
+        _     (when-let [updated-date (:updated-date m)]
+                (.setUpdatedDate entry updated-date))]
+    entry))
+
 
 
 (defn ^SyndFeed clj->feed [{:keys [info entries foreign-markup]}]
