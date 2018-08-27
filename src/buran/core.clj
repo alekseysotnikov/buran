@@ -3,20 +3,32 @@
   (:import [com.rometools.rome.io SyndFeedInput SyndFeedOutput XmlReader]
            [java.net URL]
            [java.util Locale]
-           [java.io File Writer InputStream]))
+           [java.io File Writer InputStream StringReader]))
 
 
 ;; App API
 
 
-(defn consume [{:keys [from validate locale xml-healer-on allow-doctypes]
-                :as source
-                :or   {validate       false
-                       locale         (Locale/US)
-                       xml-healer-on  true
-                       allow-doctypes false}}]
+(defn- surround-exception [throw-exception f]
+  (try
+    (f)
+    (catch Throwable e
+      (if throw-exception
+        (throw e)
+        {:message (.getMessage e)
+         :error   e}))))
+
+
+(defn consume [{:keys [from validate locale xml-healer-on allow-doctypes throw-exception]
+                :as   source
+                :or   {validate         false
+                       locale           (Locale/US)
+                       xml-healer-on    true
+                       allow-doctypes   false
+                       throw-exception false}}]
   "
-  from  - <file path string>, File, Reader, W3C DOM document, JDOM document, W3C SAX InputSource
+  source - either a map with options or a feed as String
+  from  - String, File, Reader, W3C DOM document, JDOM document, W3C SAX InputSource
   validate - indicates if the input should be validated
   locale - java.util.Locale
   xml-healer-on - Healing trims leading chars from the stream (empty spaces and comments) until the XML prolog.
@@ -24,13 +36,14 @@
                   The healing is done only with the File and Reader.
   allow-doctypes - you should only activate it when the feeds that you process are absolutely trustful
   "
-  (let [from     (if (string? source) source from)
-        from     (if (string? from) (File. from) from)
-        consumer (doto
-                   (SyndFeedInput. validate locale)
-                   (.setAllowDoctypes allow-doctypes)
-                   (.setXmlHealerOn xml-healer-on))]
-    (feed->clj (.build consumer from))))
+  (surround-exception throw-exception
+                      #(let [from     (if (string? source) (StringReader. source) from)
+                             from     (if (string? from) (File. from) from)
+                             consumer (doto
+                                        (SyndFeedInput. validate locale)
+                                        (.setAllowDoctypes allow-doctypes)
+                                        (.setXmlHealerOn xml-healer-on))]
+                          (feed->clj (.build consumer from)))))
 
 
 (defn- http-reader [{:keys [from headers lenient default-encoding]
@@ -42,11 +55,11 @@
   lenient - indicates if the charset encoding detection should be relaxed
   default-encoding - UTF-8, UTF-16, UTF-16BE, UTF-16LE, CP1047, US-ASCII
   "
-  (cond
-    (instance? String from)      (XmlReader. (.openConnection (URL. from)) headers)
-    (instance? URL from)         (XmlReader. (.openConnection from) headers)
-    (instance? File from)        (XmlReader. from)
-    (instance? InputStream from) (XmlReader. from (:content-type headers) lenient default-encoding)))
+  (condp instance? from
+     String      (XmlReader. (.openConnection (URL. from)) headers)
+     URL         (XmlReader. (.openConnection from) headers)
+     File        (XmlReader. from)
+     InputStream (XmlReader. from (:content-type headers) lenient default-encoding)))
 
 
 (defn consume-http [request]
@@ -58,25 +71,28 @@
     (consume request)))
 
 
-(defn produce [{:keys [feed to pretty-print]
+(defn produce [{:keys [feed to pretty-print throw-exception]
                 :as   feed-as-arg
-                :or   {to           :string
-                       pretty-print true}}]
+                :or   {to               :string
+                       pretty-print     true
+                       throw-exception false}}]
   "
+  feed-as-arg - either a map with options or a feed to generate
   feed - a feed to generate
   to - <file path string>, :string, :w3cdom, :jdom, File, Writer
   pretty-print - pretty-print XML output
   "
-  (let [feed     (if (nil? feed) feed-as-arg feed)
-        feed     (clj->feed feed)
-        producer (SyndFeedOutput.)]
-    (cond
-      (= :string to) (.outputString producer feed pretty-print)
-      (= :w3cdom to) (.outputW3CDom producer feed)
-      (= :jdom to) (.outputJDom producer feed)
-      (string? to) (.output producer feed (File. to) pretty-print)
-      (or (instance? File to)
-          (instance? Writer to)) (.output producer feed to pretty-print))))
+  (surround-exception throw-exception
+                      #(let [feed     (if (nil? feed) feed-as-arg feed)
+                             feed     (clj->feed feed)
+                             producer (SyndFeedOutput.)]
+                         (cond
+                           (= :string to)             (.outputString producer feed pretty-print)
+                           (= :w3cdom to)             (.outputW3CDom producer feed)
+                           (= :jdom to)               (.outputJDom producer feed)
+                           (string? to)               (.output producer feed (File. to) pretty-print)
+                           (or (instance? File to)
+                               (instance? Writer to)) (.output producer feed to pretty-print)))))
 
 
 ;; Utilities
@@ -84,7 +100,8 @@
 
 (defn combine-feeds [feed & feeds]
   "Combine entries of feeds, put into the first one feed and return it"
-  (assoc feed :entries (lazy-seq (apply concat (map :entries (cons feed feeds))))))
+  (let [entries (apply concat (map :entries (cons feed feeds)))]
+    (assoc feed :entries (lazy-seq entries))))
 
 
 (defn sort-entries-by

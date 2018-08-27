@@ -1,4 +1,4 @@
-(defproject buran "0.1.0"
+(defproject buran "0.1.1"
 
   :description "Bidirectional RSS/Atom feed consumer(parser) and producer(writer)"
 
@@ -9,6 +9,7 @@
 
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [com.rometools/rome "1.11.0"]]
+
 
   :deploy-repositories {"clojars-https" {:url "https://clojars.org/repo"
                                          :sign-releases false}}
