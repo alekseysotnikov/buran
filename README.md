@@ -37,18 +37,18 @@ Every time you work with the same data structure.
 
 Consume a feed from String
 ````clojure
-(def feed "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r
-           <feed xmlns=\"http://www.w3.org/2005/Atom\">\r
-             <title>Feed title</title>\r
-             <subtitle />\r
-             <entry>\r
-               <title>Entry title</title>\r
-               <author>\r
-                 <name />\r
-               </author>\r
-               <summary>entry description</summary>\r
-             </entry>\r
-           </feed>\r
+(def feed "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+           <feed xmlns=\"http://www.w3.org/2005/Atom\">
+             <title>Feed title</title>
+             <subtitle />
+             <entry>
+               <title>Entry title</title>
+               <author>
+                 <name />
+               </author>
+               <summary>entry description</summary>
+             </entry>
+           </feed>
            ")
 (consume feed)
 ````
@@ -122,7 +122,7 @@ Produce a feed
                             :description {:value "entry description"}}]})
 (produce feed)
 =>
-"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r
+"<?xml version=\"1.0\" encoding=\"UTF-8\"?>
  <feed xmlns=\"http://www.w3.org/2005/Atom\">\r
    <title>Feed title</title>\r
    <subtitle />\r
@@ -133,20 +133,21 @@ Produce a feed
      </author>\r
      <summary>entry description</summary>\r
    </entry>\r
- </feed>\r
+ </feed>
  "
 ````
 
 ### Various options
 
 ````clojure
-(consume {:from             "~/feed.xml" ; <file path string>, File, Reader, W3C DOM document, JDOM document, W3C SAX InputSource
-          :validate         false        ; Indicates if the input should be validated
-          :locale           (Locale/US)  ; java.util.Locale
-          :xml-healer-on    true         ; Healing trims leading chars from the stream (empty spaces and comments) until the XML prolog.
-                                         ; Healing resolves HTML entities (from literal to code number) in the reader.
-                                         ; The healing is done only with the File and Reader.
-          :allow-doctypes   false        ; You should only activate it when the feeds that you process are absolutely trustful
+(consume {:from             (java.io.File. "~/feed.xml") 
+                                        ; String, File, Reader, W3C DOM document, JDOM document, W3C SAX InputSource
+          :validate         false       ; Indicates if the input should be validated
+          :locale           (Locale/US) ; java.util.Locale
+          :xml-healer-on    true        ; Healing trims leading chars from the stream (empty spaces and comments) until the XML prolog.
+                                        ; Healing resolves HTML entities (from literal to code number) in the reader.
+                                        ; The healing is done only with the File and Reader.
+          :allow-doctypes   false       ; You should only activate it when the feeds that you process are absolutely trustful
           :throw-exception false        ; false - return map with an exception, throw an exception otherwise
          })
 ````
@@ -169,8 +170,6 @@ Please consider using a separate library like [clj-http](https://github.com/dakr
                                         ; rss_0.9
                   :title "Feed title"}
            :entries [{:title       "Entry 1 title"
-                      :description {:value "entry description"}}
-                     {:title       "Entry 2 title"
                       :description {:value "entry description"}}]
            :foreign-markup nil})
 
