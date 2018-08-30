@@ -21,17 +21,19 @@ After the modifications, Buran can generate from it your own feed, for example i
 
 in your namespace
 ```clojure
-(:require [buran.core :refer :all])
+(:require [buran.core :refer [consume consume-http produce combine-feeds filter-entries sort-entries-by]])
 ```
 or
 ````clojure
-(require '[buran.core :refer :all])
+(require '[buran.core :refer [consume consume-http produce combine-feeds filter-entries sort-entries-by]])
 ````
 
 ## Usage
 
 No matter with which format of a feed you work, no matter you want to consume a feed or produce a new one. 
 Every time you work with the same data structure.
+Buran's API is short - `consume`, `consume-http`, `produce` and some helpers to manipulate the feeds `combine-feeds`, `filter-entries`, `sort-entries-by`. 
+The basic workflow is continually passing a data structure to the API functions, see [Various options](#various-options) for details.
 
 ### examples
 
@@ -51,6 +53,30 @@ Consume a feed from String
            </feed>
            ")
 (consume feed)
+````
+
+Produce a feed
+
+````clojure
+(def feed {:info {:feed-type "atom_1.0"
+                  :title     "Feed title"}
+           :entries [{:title       "Entry title"
+                      :description {:value "entry description"}}]})
+(produce feed)
+=>
+"<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+ <feed xmlns=\"http://www.w3.org/2005/Atom\">\r
+   <title>Feed title</title>\r
+   <subtitle />\r
+   <entry>\r
+     <title>Entry title</title>\r
+     <author>\r
+       <name />\r
+     </author>\r
+     <summary>entry description</summary>\r
+   </entry>\r
+ </feed>
+ "
 ````
 
 Consume a feed over http
@@ -113,30 +139,6 @@ Consume a feed over http
                           "[Element: <creativeCommons:license [Namespace: http://backend.userland.com/creativeCommonsRssModule]/>]"]]}
 ````
 
-Produce a feed
-
-````clojure
-(def feed {:info {:feed-type "atom_1.0"
-                           :title     "Feed title"}
-                 :entries [{:title       "Entry title"
-                            :description {:value "entry description"}}]})
-(produce feed)
-=>
-"<?xml version=\"1.0\" encoding=\"UTF-8\"?>
- <feed xmlns=\"http://www.w3.org/2005/Atom\">\r
-   <title>Feed title</title>\r
-   <subtitle />\r
-   <entry>\r
-     <title>Entry title</title>\r
-     <author>\r
-       <name />\r
-     </author>\r
-     <summary>entry description</summary>\r
-   </entry>\r
- </feed>
- "
-````
-
 ### Various options
 
 ````clojure
@@ -148,20 +150,9 @@ Produce a feed
                                         ; Healing resolves HTML entities (from literal to code number) in the reader.
                                         ; The healing is done only with the File and Reader.
           :allow-doctypes   false       ; You should only activate it when the feeds that you process are absolutely trustful
-          :throw-exception false        ; false - return map with an exception, throw an exception otherwise
+          :throw-exception  false       ; false - return map with an exception, throw an exception otherwise
          })
 ````
-
-````clojure
-(consume-http {:from             "https://stackoverflow.com/feeds/tag?tagnames=clojure" 
-                                                      ; <http url string>, URL, File, InputStream
-               :headers          {"X-Header" "Value"} ; Request's HTTP headers map
-               :lenient          true                 ; Indicates if the charset encoding detection should be relaxed
-               :default-encoding "US-ASCII"           ; Supports: UTF-8, UTF-16, UTF-16BE, UTF-16LE, CP1047, US-ASCII
-              })
-````
-*Beware!* ```consume-http``` from either http url string or URL is rudimentary and works only for simplest cases. For instance, it does not follow HTTP 302 redirects.
-Please consider using a separate library like [clj-http](https://github.com/dakrone/clj-http) or [http-kit](http://www.http-kit.org/client.html) for fetching the feed.
 
 ````clojure
 (def feed {:info {:feed-type "atom_1.0" ; Supports: atom_1.0, atom_0.3, rss_2.0, 
@@ -172,21 +163,33 @@ Please consider using a separate library like [clj-http](https://github.com/dakr
            :entries [{:title       "Entry 1 title"
                       :description {:value "entry description"}}]
            :foreign-markup nil})
-
-(produce {:feed             feed
-          :to               :string ; <file path string>, :string, :w3cdom, :jdom, File, Writer
-          :pretty-print     true    ; Pretty-print XML output
+           
+(produce {:feed            feed
+          :to              :string ; <file path string>, :string, :w3cdom, :jdom, File, Writer
+          :pretty-print    true    ; Pretty-print XML output
           :throw-exception false   ; false - return map with an exception, throw an exception otherwise
          })
 ````
- 
+
+*Beware!* ```consume-http``` from either http url string or URL is rudimentary and works only for simplest cases. For instance, it does not follow HTTP 302 redirects.
+Please consider using a separate library like [clj-http](https://github.com/dakrone/clj-http) or [http-kit](http://www.http-kit.org/client.html) for fetching the feed.
+````clojure
+(consume-http {:from             "https://stackoverflow.com/feeds/tag?tagnames=clojure" 
+                                                      ; <http url string>, URL, File, InputStream
+               :headers          {"X-Header" "Value"} ; Request's HTTP headers map
+               :lenient          true                 ; Indicates if the charset encoding detection should be relaxed
+               :default-encoding "US-ASCII"           ; Supports: UTF-8, UTF-16, UTF-16BE, UTF-16LE, CP1047, US-ASCII
+               :throw-exception  false                ; false - return map with an exception, throw an exception otherwise
+               ... + all options which are applied to a consume call
+              })
+````
 
 ## TODO
 
 - [ ] shrinking a feed (removing nils and empty colls)
 - [ ] transforming non-standard `:foreign-markup` data to Clojure's data structures
 - [ ] examples of the feeds combining, sorting and filtering
-- [ ] more test coverage
+- [ ] test coverage not less then 75%
 
 ## License
 
