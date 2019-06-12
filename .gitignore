@@ -4,3 +4,4 @@ target
 .nrepl-port
 .lein-failures
 pom.xml
+.eastwood

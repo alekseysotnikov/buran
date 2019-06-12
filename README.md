@@ -15,7 +15,7 @@ After the modifications, Buran can generate from it your own feed, for example i
 
 ### Installation
 
-1. Add to *project.clj* - ```[buran "0.1.1"]```
+1. Add to *project.clj* - ```[buran "0.1.2"]```
 
 2. Import 
 
@@ -193,6 +193,6 @@ Please consider using a separate library like [clj-http](https://github.com/dakr
 
 ## License
 
-Copyright © 2018 Aleksei Sotnikov
+Copyright © 2018-2019 Aleksei Sotnikov
 
 Distributed under the Eclipse Public License version 2.0
