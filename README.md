@@ -214,15 +214,8 @@ Please consider using a separate library like [clj-http](https://github.com/dakr
               })
 ````
 
-## TODO
-
-- [x] shrinking a feed (removing nils and empty colls)
-- [ ] transforming non-standard `:foreign-markup` data to Clojure's data structures
-- [ ] examples of the feeds combining, sorting and filtering
-- [ ] test coverage not less then 75%
-
 ## License
 
 Copyright © 2018-2019 Aleksei Sotnikov
 
-Distributed under the Eclipse Public License version 2.0
+Distributed under the Apache License 2.0
