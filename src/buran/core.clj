@@ -134,11 +134,6 @@
 
     (string? x) (not-empty x)
 
-    (sequential? x) (not-empty
-                      (into
-                        (empty x)
-                        (->> x
-                             (map shrink)
-                             (filter identity))))
+    (sequential? x) (not-empty (into (empty x) (keep shrink x)))
 
     :else x))
