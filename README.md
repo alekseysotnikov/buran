@@ -32,7 +32,7 @@ or REPL
 
 No matter with which format of a feed you work, no matter you want to consume a feed or produce a new one. 
 Every time you work with the same data structure.
-Buran's API is short - `consume`, `consume-http`, `produce` and some helpers to manipulate the feeds `combine-feeds`, `filter-entries`, `sort-entries-by`. 
+Buran's API is short - `consume`, `consume-http`, `produce` and some helpers to manipulate the feeds `combine-feeds`, `filter-entries`, `sort-entries-by` and `shrink`. 
 The basic workflow is continually passing a data structure to the API functions, see [Various options](#various-options) for details.
 
 ### examples
