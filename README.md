@@ -55,8 +55,8 @@ Consume a feed from String
 (shrink (consume feed))
 =>
 {:info    {:feed-type "atom_1.0", 
-           :title "Feed title"},
- :entries [{:title "Entry title", 
+           :title     "Feed title"},
+ :entries [{:title       "Entry title", 
             :description {:value "entry description"}}]}
 ````
 
