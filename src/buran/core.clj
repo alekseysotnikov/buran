@@ -117,3 +117,28 @@
 
 (defn filter-entries [pred feed]
   (update-in feed [:entries] #(filter pred %)))
+
+
+(defn shrink
+  "Removes from `x` any empty sequential or nil values"
+  [x]
+  (cond
+    (map? x) (not-empty
+               (reduce-kv
+                 (fn [s k v]
+                   (let [v' (shrink v)]
+                     (cond-> s
+                             v' (assoc k v'))))
+                 (empty x)
+                 x))
+
+    (string? x) (not-empty x)
+
+    (sequential? x) (not-empty
+                      (into
+                        (empty x)
+                        (->> x
+                             (map shrink)
+                             (filter identity))))
+
+    :else x))

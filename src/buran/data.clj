@@ -58,7 +58,7 @@
 (defn entry->clj [^SyndEntry o]
   {:updated-date    (.getUpdatedDate o)
    :title           (.getTitle o)
-   :foreign-markup  (.getForeignMarkup o)
+   :foreign-markup  (not-empty (.getForeignMarkup o))
    :categories      (map category->clj (.getCategories o))
    :comments        (.getComments o)
    :contributors    (map person->clj (.getContributors o))
@@ -96,7 +96,7 @@
           :link            (.getLink o)
           :managing-editor (.getManagingEditor o)}
    :entries         (map entry->clj (.getEntries o))
-   :foreign-markup  (.getForeignMarkup o)})
+   :foreign-markup  (not-empty (.getForeignMarkup o))})
 
 
 ;; clj->rome transformers

@@ -15,17 +15,17 @@ After the modifications, Buran can generate from it your own feed, for example i
 
 ### Installation
 
-1. Add to *project.clj* - ```[buran "0.1.2"]```
+1. Add to *project.clj* - ```[buran "0.1.3"]```
 
 2. Import 
 
 in your namespace
 ```clojure
-(:require [buran.core :refer [consume consume-http produce combine-feeds filter-entries sort-entries-by]])
+(:require [buran.core :refer [consume consume-http produce combine-feeds filter-entries sort-entries-by shrink]])
 ```
-or
+or REPL
 ````clojure
-(require '[buran.core :refer [consume consume-http produce combine-feeds filter-entries sort-entries-by]])
+(require '[buran.core :refer [consume consume-http produce combine-feeds filter-entries sort-entries-by shrink]])
 ````
 
 ## Usage
@@ -52,7 +52,10 @@ Consume a feed from String
              </entry>
            </feed>
            ")
-(consume feed)
+(shrink (consume feed))
+=>
+{:info    {:feed-type "atom_1.0", :title "Feed title"},
+ :entries [{:title "Entry title", :description {:value "entry description"}}]}
 ````
 
 Produce a feed
@@ -115,9 +118,7 @@ Consume a feed over http
                           :value "<p>..."},
             :updated-date #inst"2018-08-20T06:16:12.000-00:00",
             :comments nil,
-            :foreign-markup [#object[org.jdom2.Element
-                                     0x46c2cb18
-                                     "[Element: <re:rank [Namespace: http://purl.org/atompub/rank/1.0]/>]"]],
+            :foreign-markup [...],
             :published-date #inst"2018-08-20T05:54:39.000-00:00",
             :title "Clojure evaluate lazy sequence",
             :author "Constantine",
@@ -134,11 +135,40 @@ Consume a feed over http
                      :type nil,
                      :rel "alternate",
                      :length 0})}, ...),
- :foreign-markup [#object[org.jdom2.Element
-                          0x19cc70fb
-                          "[Element: <creativeCommons:license [Namespace: http://backend.userland.com/creativeCommonsRssModule]/>]"]]}
+ :foreign-markup [...]}
 ````
 
+Shrink a feed (remove nils, empty colls, maps and etc.)
+
+```clojure
+(def feed (consume-http "https://stackoverflow.com/feeds/tag?tagnames=clojure"))
+(shrink feed)
+=>
+{:info {:description "most recent 30 from stackoverflow.com",
+        :feed-type "atom_1.0",
+        :published-date #inst"2018-08-20T08:03:33.000-00:00",
+        :title "Active questions tagged clojure - Stack Overflow",
+        :link "https://stackoverflow.com/questions/tagged/?tagnames=clojure&sort=active",
+        :uri "https://stackoverflow.com/feeds/tag?tagnames=clojure",
+        :links [{:href "https://stackoverflow.com/questions/tagged/?tagnames=clojure&sort=active",
+                 :type "text/html",
+                 :rel "alternate",
+                 :length 0}, ...]},
+ :entries [{:description {:type "html", :value "<p>..."},
+            :updated-date #inst"2018-08-20T06:16:12.000-00:00",
+            :foreign-markup [...],
+            :published-date #inst"2018-08-20T05:54:39.000-00:00",
+            :title "Clojure evaluate lazy sequence",
+            :author "Constantine",
+            :categories [{:name "clojure", :taxonomy-uri "https://stackoverflow.com/tags"}, ...],
+            :link "https://stackoverflow.com/questions/51924808/clojure-evaluate-lazy-sequence",
+            :uri "https://stackoverflow.com/q/51924808",
+            :authors [{:name "Constantine", :uri "https://stackoverflow.com/users/4201205"}],
+            :links [{:href "https://stackoverflow.com/questions/51924808/clojure-evaluate-lazy-sequence",
+                     :rel "alternate",
+                     :length 0}]}, ...],
+ :foreign-markup [...]}
+```
 ### Various options
 
 ````clojure
@@ -186,7 +216,7 @@ Please consider using a separate library like [clj-http](https://github.com/dakr
 
 ## TODO
 
-- [ ] shrinking a feed (removing nils and empty colls)
+- [x] shrinking a feed (removing nils and empty colls)
 - [ ] transforming non-standard `:foreign-markup` data to Clojure's data structures
 - [ ] examples of the feeds combining, sorting and filtering
 - [ ] test coverage not less then 75%
