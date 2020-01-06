@@ -218,6 +218,6 @@ Please consider using a separate library like [clj-http](https://github.com/dakr
 
 ## License
 
-Copyright © 2018-2019 Aleksei Sotnikov
+Copyright © 2018-2020 Aleksei Sotnikov
 
 Distributed under the Apache License 2.0
