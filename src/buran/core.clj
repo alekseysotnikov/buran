@@ -10,13 +10,13 @@
 
 
 (defmacro with-exception [throw? & body]
-  (if throw?
-    `(do ~@body)
-    `(try
-       ~@body
-       (catch Throwable e#
-         {:message (.getMessage e#)
-          :error   e#}))))
+  (list 'if throw?
+        `(do ~@body)
+        `(try
+           ~@body
+           (catch Exception e#
+             {:message (.getMessage e#)
+              :error   e#}))))
 
 
 (defn consume
@@ -38,8 +38,11 @@
            allow-doctypes  false
            throw-exception false}}]
   (with-exception throw-exception
-                  (let [from     (if (string? source) (StringReader. source) from)
-                        from     (if (string? from) (File. from) from)
+                  (let [from     (if (string? source)
+                                   (StringReader. source)
+                                   (cond
+                                     (fn? from)     (from)
+                                     (string? from) (StringReader. from)))
                         consumer (doto
                                    (SyndFeedInput. validate locale)
                                    (.setAllowDoctypes allow-doctypes)
@@ -68,8 +71,7 @@
   (let [request (if (string? request)
                   {:from request}
                   request)
-        reader  (http-reader request)
-        request (assoc request :from reader)]
+        request (assoc request :from #(http-reader request))]
     (consume request)))
 
 
