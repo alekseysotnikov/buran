@@ -100,6 +100,9 @@
 (deftest negative-consume-http
   (let [{:keys [error message]} (consume-http "invalid://url")]
     (is (instance? Throwable error))
+    (is (= "unknown protocol: invalid" message)))
+  (let [{:keys [error message]} (consume-http {:from "invalid://url"})]
+    (is (instance? Throwable error))
     (is (= "unknown protocol: invalid" message))))
 
 
@@ -165,6 +168,7 @@
                             :title          "Simple web app of Bidi, Ring and Lein gives a 500 error"
                             :updated-date   #inst "2020-02-15T00:47:32.000-00:00"
                             :uri            "https://stackoverflow.com/q/60234899"}
+
                            {:author         "Bob"
                             :authors        ({:name "Bob"
                                               :uri  "https://stackoverflow.com/users/5440125"})
@@ -192,7 +196,14 @@
                             :description    {:type  "html"
                                              :value "Suppose I want to unmap all the namespaces..."}
                             :link           "https://stackoverflow.com/questions/60243053/how-to-return-namespaces-by-regex-in-clojure"
-                            :links          ({:href   "https://stackoverflow.com/questions/60243053/how-to-return-namespaces-by-regex-in-clojure"
+                            :enclosures     [{:url    "https://someurl"
+                                              :type   "png"
+                                              :length 0}]
+                            :links          ({:href   "https://someurl"
+                                              :length 0
+                                              :rel    "enclosure"
+                                              :type   "png"}
+                                             {:href   "https://stackoverflow.com/questions/60243053/how-to-return-namespaces-by-regex-in-clojure"
                                               :length 0
                                               :rel    "alternate"})
                             :published-date #inst "2020-02-15T20:56:55.000-00:00"
