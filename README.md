@@ -6,6 +6,8 @@
 [![Clojars Project](https://img.shields.io/clojars/v/buran.svg)](https://clojars.org/buran)
 [![CircleCI](https://circleci.com/gh/alekseysotnikov/buran.svg?style=shield)](https://circleci.com/gh/alekseysotnikov/buran)
 [![codecov](https://codecov.io/gh/alekseysotnikov/buran/branch/master/graph/badge.svg)](https://codecov.io/gh/alekseysotnikov/buran)
+[![CodeScene System Mastery](https://codescene.io/projects/9187/status-badges/system-mastery)](https://codescene.io/projects/9187)
+[![CodeScene Code Health](https://codescene.io/projects/9187/status-badges/code-health)](https://codescene.io/projects/9187)
 
 Buran is a library designed to consume and produce any RSS/Atom feeds by using data-driven approach.
 It works as [ROME](https://rometools.github.io/rome/) wrapper but in Buran, feeds are just data structures. 
