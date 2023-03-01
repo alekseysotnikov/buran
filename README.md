@@ -144,7 +144,7 @@ Shrink a feed (remove nils, empty colls, maps and etc.)
                :lenient          true                 ; Indicates if the charset encoding detection should be relaxed
                :default-encoding "US-ASCII"           ; Supports: UTF-8, UTF-16, UTF-16BE, UTF-16LE, CP1047, US-ASCII
                ... 
-               + all options which are applied to a (consume) call
+               + All options applied to a (consume) call.
               })
 ````
 *Beware!* ```consume-http``` from either http url string or URL is rudimentary and works only for simplest cases. For instance, it does not follow HTTP 302 redirects.
