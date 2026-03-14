@@ -16,23 +16,24 @@ Buran is a bidirectional feed library: parse any RSS/Atom feed into Clojure data
 Buran can be used as an aggregator for various feed formats, converting them into regular Clojure data structures. When consuming a feed, Buran creates a map, which can be read or manipulated using regular functions such as ```filter```, ```sort```, ```assoc```, ```dissoc```, and more. After the modifications, Buran can generate your own feed, for example, in a different format (RSS 2.0, 1.0, 0.9x or Atom 1.0, 0.3).
 
 ## Quick Start
-    ;; Add to deps.edn
-    {:deps {buran/buran {:mvn/version "0.1.4"}}}
+````clojure
+;; Add to deps.edn
+{:deps {buran/buran {:mvn/version "0.1.4"}}}
 
-    ;; Or to project.clj
-    [buran "0.1.4"]
+;; Or to project.clj
+[buran "0.1.4"]
 
-    ;; In your namespace
-    (ns your.app
-      (:require [buran.core :as buran]))
+;; In your namespace
+(ns your.app
+  (:require [buran.core :as buran]))
 
-    ;; Parse a feed
-    (def data (buran/consume-http "https://stackoverflow.com/feeds/tag?tagnames=clojure"))
+;; Parse a feed
+(def data (buran/consume-http "https://stackoverflow.com/feeds/tag?tagnames=clojure"))
 
-    ;; Generate a feed
-    (buran/produce {:info {:feed-type "atom_1.0" :title "My Feed"}
-                    :entries [{:title "Hello" :description {:value "World"}}]})
-
+;; Generate a feed
+(buran/produce {:info {:feed-type "atom_1.0" :title "My Feed"}
+                :entries [{:title "Hello" :description {:value "World"}}]})
+````
 ## Usage
 
 Regardless of the feed format you are working with and whether you want to consume or produce a new feed, Buran uses the same data structure every time. Buran's API is concise, with functions such as `consume`, `consume-http`, `produce`, and some helpers to manipulate feeds, including `combine-feeds`, `filter-entries`, `sort-entries-by` and `shrink`. The basic workflow involves passing the data structure to the API functions repeatedly. See the documentation for [Various options](#various-options) and details.
