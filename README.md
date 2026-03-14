@@ -232,4 +232,4 @@ Remove nil values and empty collections from feed data.
 
 Copyright © 2018-2026 Aleksei Sotnikov
 
-Distributed under the Apache License 2.0
+Distributed under the MIT License
