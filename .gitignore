@@ -7,3 +7,4 @@ pom.xml
 .eastwood
 .lsp
 .lein-repl-history
+.clj-kondo
