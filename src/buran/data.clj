@@ -8,7 +8,8 @@
      SyndPerson SyndPersonImpl
      SyndLink SyndLinkImpl
      SyndContent SyndContentImpl
-     SyndEnclosure SyndEnclosureImpl]))
+     SyndEnclosure SyndEnclosureImpl]
+    [org.jdom2 Element]))
 
 
 ;; rome->clj transformers
@@ -55,10 +56,32 @@
    :link        (.getLink o)})
 
 
+(defn- jdom2->hiccup
+  "Convert JDOM2 Element to Hiccup format."
+  [elem]
+  (let [tag         (keyword (.getName elem))
+        attrs       (reduce (fn [m a] (assoc m (keyword (.getName a)) (.getValue a)))
+                            {}
+                            (.getAttributes elem))
+        kids        (.getChildren elem)
+        child-elems (filter #(instance? org.jdom2.Element %) kids)
+        children    (map jdom2->hiccup child-elems)
+        text        (.getText elem)]
+    (if (seq child-elems)
+      (into [tag attrs] children)
+      [tag attrs (or text "")])))
+
+(defn- foreign-markup->hiccup
+  "Convert JDOM2 foreign-markup to Hiccup format."
+  [nodes]
+  (when nodes
+    (let [items (if (sequential? nodes) nodes (seq nodes))]
+      (into [] (map jdom2->hiccup items)))))
+
 (defn entry->clj [^SyndEntry o]
   {:updated-date   (.getUpdatedDate o)
    :title          (.getTitle o)
-   :foreign-markup (not-empty (.getForeignMarkup o))
+   :foreign-markup (foreign-markup->hiccup (.getForeignMarkup o))
    :categories     (map category->clj (.getCategories o))
    :comments       (.getComments o)
    :contributors   (map person->clj (.getContributors o))
@@ -96,7 +119,7 @@
                     :link            (.getLink o)
                     :managing-editor (.getManagingEditor o)}
    :entries        (map entry->clj (.getEntries o))
-   :foreign-markup (not-empty (.getForeignMarkup o))})
+   :foreign-markup (foreign-markup->hiccup (.getForeignMarkup o))})
 
 
 ;; clj->rome transformers
@@ -105,61 +128,80 @@
 (defn ^SyndEnclosure clj->enclosure [m]
   (doto
     (SyndEnclosureImpl.)
-    (.setUrl            (:url m))
-    (.setType           (:type m))
-    (.setLength         (:length m))))
+    (.setUrl (:url m))
+    (.setType (:type m))
+    (.setLength (:length m))))
 
 
 (defn ^SyndContent clj->content [m]
   (doto
     (SyndContentImpl.)
-    (.setMode           (:mode m))
-    (.setType           (:type m))
-    (.setValue          (:value m))))
+    (.setMode (:mode m))
+    (.setType (:type m))
+    (.setValue (:value m))))
 
 
 (defn ^SyndLink clj->link [m]
   (doto
     (SyndLinkImpl.)
-    (.setHreflang       (:hreflang m))
-    (.setTitle          (:title m))
-    (.setHref           (:href m))
-    (.setType           (:type m))
-    (.setRel            (:rel m))
-    (.setLength         (:length m))))
+    (.setHreflang (:hreflang m))
+    (.setTitle (:title m))
+    (.setHref (:href m))
+    (.setType (:type m))
+    (.setRel (:rel m))
+    (.setLength (:length m))))
 
 
 (defn ^SyndPerson clj->person [m]
   (doto
     (SyndPersonImpl.)
-    (.setName           (:name m))
-    (.setEmail          (:email m))
-    (.setUri            (:uri m))))
+    (.setName (:name m))
+    (.setEmail (:email m))
+    (.setUri (:uri m))))
 
 
 (defn ^SyndCategory clj->category [m]
   (doto
     (SyndCategoryImpl.)
-    (.setName           (:name m))
-    (.setTaxonomyUri    (:taxonomy-uri m))))
+    (.setName (:name m))
+    (.setTaxonomyUri (:taxonomy-uri m))))
 
 
 (defn ^SyndImage clj->image [m]
   (doto
     (SyndImageImpl.)
-    (.setTitle          (:title m))
-    (.setUrl            (:url m))
-    (.setWidth          (:width m))
-    (.setDescription    (:description m))
-    (.setHeight         (:height m))
-    (.setLink           (:link m))))
+    (.setTitle (:title m))
+    (.setUrl (:url m))
+    (.setWidth (:width m))
+    (.setDescription (:description m))
+    (.setHeight (:height m))
+    (.setLink (:link m))))
 
+
+(defn- hiccup->jdom2
+  "Convert Hiccup form to JDOM2 Element."
+  [hiccup-form]
+  (let [[tag attrs & kids] hiccup-form
+        elem               ^Element (Element. (name tag))]
+    (doseq [[k v] attrs]
+      (.setAttribute elem (name k) (str v)))
+    (doseq [kid kids]
+      (.addContent elem (if (vector? kid) (hiccup->jdom2 kid) (str kid))))
+    elem))
+
+(defn- foreign-markup->dom
+  "Convert Hiccup foreign-markup to JDOM2 Elements for Rome."
+  [foreign-markup]
+  (when foreign-markup
+    (if (sequential? foreign-markup)
+      (into [] (map hiccup->jdom2 foreign-markup))
+      (list (hiccup->jdom2 foreign-markup)))))
 
 (defn ^SyndEntry clj->entry [m]
   (let [entry (doto
                 (SyndEntryImpl.)
                 (.setTitle (:title m))
-                (.setForeignMarkup (:foreign-markup m))
+                (.setForeignMarkup (foreign-markup->dom (:foreign-markup m)))
                 (.setCategories (map clj->category (:categories m)))
                 (.setComments (:comments m))
                 (.setContributors (map clj->person (:contributors m)))
@@ -181,26 +223,26 @@
 (defn ^SyndFeed clj->feed [{:keys [info entries foreign-markup]}]
   (doto
     (SyndFeedImpl.)
-    (.setFeedType       (:feed-type info))
-    (.setWebMaster      (:web-master info))
-    (.setEncoding       (:encoding info))
-    (.setTitle          (:title info))
-    (.setForeignMarkup  foreign-markup)
-    (.setCategories     (map clj->category (:categories info)))
-    (.setGenerator      (:generator info))
-    (.setContributors   (map clj->person (:contributors info)))
-    (.setPublishedDate  (:published-date info))
-    (.setCopyright      (:copyright info))
-    (.setEntries        (map clj->entry entries))
-    (.setImage          (when-let [r (:image info)] (clj->image r)))
-    (.setUri            (:uri info))
-    (.setLinks          (map clj->link (:links info)))
-    (.setAuthor         (:author info))
-    (.setDescription    (:description info))
-    (.setDocs           (:docs info))
-    (.setStyleSheet     (:style-sheet info))
-    (.setAuthors        (map clj->person (:authors info)))
-    (.setLanguage       (:language info))
-    (.setIcon           (when-let [r (:icon info)] (clj->image r)))
-    (.setLink           (:link info))
+    (.setFeedType (:feed-type info))
+    (.setWebMaster (:web-master info))
+    (.setEncoding (:encoding info))
+    (.setTitle (:title info))
+    (.setForeignMarkup (foreign-markup->dom foreign-markup))
+    (.setCategories (map clj->category (:categories info)))
+    (.setGenerator (:generator info))
+    (.setContributors (map clj->person (:contributors info)))
+    (.setPublishedDate (:published-date info))
+    (.setCopyright (:copyright info))
+    (.setEntries (map clj->entry entries))
+    (.setImage (when-let [r (:image info)] (clj->image r)))
+    (.setUri (:uri info))
+    (.setLinks (map clj->link (:links info)))
+    (.setAuthor (:author info))
+    (.setDescription (:description info))
+    (.setDocs (:docs info))
+    (.setStyleSheet (:style-sheet info))
+    (.setAuthors (map clj->person (:authors info)))
+    (.setLanguage (:language info))
+    (.setIcon (when-let [r (:icon info)] (clj->image r)))
+    (.setLink (:link info))
     (.setManagingEditor (:managing-editor info))))
