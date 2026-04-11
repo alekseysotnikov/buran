@@ -5,3 +5,5 @@ target
 .lein-failures
 pom.xml
 .eastwood
+.lsp
+.lein-repl-history

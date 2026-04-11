@@ -11,7 +11,7 @@
                                       [clj-kondo "2019.07.18-alpha-SNAPSHOT"]]
                        :plugins      [[lein-kibit "0.1.7"]
                                       [jonase/eastwood "0.3.6"]]}}
-  :deploy-repositories {"clojars" {:url "https://clojars.org/repo"
+  :deploy-repositories {"clojars" {:url           "https://clojars.org/repo"
                                    :sign-releases false}}
   :aliases {"deploy"   ["deploy" "clojars"]
             "kibit"    ["with-profile" "+linters" "kibit"]

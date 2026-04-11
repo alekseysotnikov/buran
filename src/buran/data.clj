@@ -15,88 +15,88 @@
 
 
 (defn enclosure->clj [^SyndEnclosure o]
-  {:url             (.getUrl o)
-   :type            (.getType o)
-   :length          (.getLength o)})
+  {:url    (.getUrl o)
+   :type   (.getType o)
+   :length (.getLength o)})
 
 
 (defn content->clj [^SyndContent o]
-  {:mode            (.getMode o)
-   :type            (.getType o)
-   :value           (.getValue o)})
+  {:mode  (.getMode o)
+   :type  (.getType o)
+   :value (.getValue o)})
 
 
 (defn link->clj [^SyndLink o]
-  {:hreflang        (.getHreflang o)
-   :title           (.getTitle o)
-   :href            (.getHref o)
-   :type            (.getType o)
-   :rel             (.getRel o)
-   :length          (.getLength o)})
+  {:hreflang (.getHreflang o)
+   :title    (.getTitle o)
+   :href     (.getHref o)
+   :type     (.getType o)
+   :rel      (.getRel o)
+   :length   (.getLength o)})
 
 
 (defn person->clj [^SyndPerson o]
-  {:name            (.getName o)
-   :email           (.getEmail o)
-   :uri             (.getUri o)})
+  {:name  (.getName o)
+   :email (.getEmail o)
+   :uri   (.getUri o)})
 
 
 (defn category->clj [^SyndCategory o]
-  {:name            (.getName o)
-   :taxonomy-uri    (.getTaxonomyUri o)})
+  {:name         (.getName o)
+   :taxonomy-uri (.getTaxonomyUri o)})
 
 
 (defn image->clj [^SyndImage o]
-  {:title           (.getTitle o)
-   :url             (.getUrl o)
-   :width           (.getWidth o)
-   :description     (.getDescription o)
-   :height          (.getHeight o)
-   :link            (.getLink o)})
+  {:title       (.getTitle o)
+   :url         (.getUrl o)
+   :width       (.getWidth o)
+   :description (.getDescription o)
+   :height      (.getHeight o)
+   :link        (.getLink o)})
 
 
 (defn entry->clj [^SyndEntry o]
-  {:updated-date    (.getUpdatedDate o)
-   :title           (.getTitle o)
-   :foreign-markup  (not-empty (.getForeignMarkup o))
-   :categories      (map category->clj (.getCategories o))
-   :comments        (.getComments o)
-   :contributors    (map person->clj (.getContributors o))
-   :contents        (map content->clj (.getContents o))
-   :published-date  (.getPublishedDate o)
-   :uri             (.getUri o)
-   :links           (map link->clj (.getLinks o))
-   :author          (.getAuthor o)
-   :description     (when-let [v (.getDescription o)] (content->clj v))
-   :authors         (map person->clj (.getAuthors o))
-   :link            (.getLink o)
-   :enclosures      (map enclosure->clj (.getEnclosures o))})
+  {:updated-date   (.getUpdatedDate o)
+   :title          (.getTitle o)
+   :foreign-markup (not-empty (.getForeignMarkup o))
+   :categories     (map category->clj (.getCategories o))
+   :comments       (.getComments o)
+   :contributors   (map person->clj (.getContributors o))
+   :contents       (map content->clj (.getContents o))
+   :published-date (.getPublishedDate o)
+   :uri            (.getUri o)
+   :links          (map link->clj (.getLinks o))
+   :author         (.getAuthor o)
+   :description    (when-let [v (.getDescription o)] (content->clj v))
+   :authors        (map person->clj (.getAuthors o))
+   :link           (.getLink o)
+   :enclosures     (map enclosure->clj (.getEnclosures o))})
 
 
 (defn feed->clj [^SyndFeed o]
-  {:info {:feed-type       (.getFeedType o)
-          :web-master      (.getWebMaster o)
-          :encoding        (.getEncoding o)
-          :title           (.getTitle o)
-          :categories      (map category->clj (.getCategories o))
-          :generator       (.getGenerator o)
-          :contributors    (map person->clj (.getContributors o))
-          :published-date  (.getPublishedDate o)
-          :copyright       (.getCopyright o)
-          :image           (when-let [v (.getImage o)] (image->clj v))
-          :uri             (.getUri o)
-          :links           (map link->clj (.getLinks o))
-          :author          (.getAuthor o)
-          :description     (.getDescription o)
-          :docs            (.getDocs o)
-          :style-sheet     (.getStyleSheet o)
-          :authors         (map person->clj (.getAuthors o))
-          :language        (.getLanguage o)
-          :icon            (when-let [v (.getIcon o)] (image->clj v))
-          :link            (.getLink o)
-          :managing-editor (.getManagingEditor o)}
-   :entries         (map entry->clj (.getEntries o))
-   :foreign-markup  (not-empty (.getForeignMarkup o))})
+  {:info           {:feed-type       (.getFeedType o)
+                    :web-master      (.getWebMaster o)
+                    :encoding        (.getEncoding o)
+                    :title           (.getTitle o)
+                    :categories      (map category->clj (.getCategories o))
+                    :generator       (.getGenerator o)
+                    :contributors    (map person->clj (.getContributors o))
+                    :published-date  (.getPublishedDate o)
+                    :copyright       (.getCopyright o)
+                    :image           (when-let [v (.getImage o)] (image->clj v))
+                    :uri             (.getUri o)
+                    :links           (map link->clj (.getLinks o))
+                    :author          (.getAuthor o)
+                    :description     (.getDescription o)
+                    :docs            (.getDocs o)
+                    :style-sheet     (.getStyleSheet o)
+                    :authors         (map person->clj (.getAuthors o))
+                    :language        (.getLanguage o)
+                    :icon            (when-let [v (.getIcon o)] (image->clj v))
+                    :link            (.getLink o)
+                    :managing-editor (.getManagingEditor o)}
+   :entries        (map entry->clj (.getEntries o))
+   :foreign-markup (not-empty (.getForeignMarkup o))})
 
 
 ;; clj->rome transformers

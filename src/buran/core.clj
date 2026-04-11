@@ -1,9 +1,9 @@
 (ns buran.core
   (:require [buran.data :refer [feed->clj clj->feed]])
   (:import [com.rometools.rome.io SyndFeedInput SyndFeedOutput XmlReader]
+           [java.io File Writer InputStream StringReader]
            [java.net URL]
-           [java.util Locale]
-           [java.io File Writer InputStream StringReader]))
+           [java.util Locale]))
 
 
 ;; App API
@@ -38,16 +38,16 @@
            allow-doctypes  false
            throw-exception false}}]
   (with-exception throw-exception
-                  (let [from     (if (string? source)
-                                   (StringReader. source)
-                                   (cond
-                                     (fn? from)     (from)
-                                     (string? from) (StringReader. from)))
-                        consumer (doto
-                                   (SyndFeedInput. validate locale)
-                                   (.setAllowDoctypes allow-doctypes)
-                                   (.setXmlHealerOn xml-healer-on))]
-                    (feed->clj (.build consumer from)))))
+    (let [from     (if (string? source)
+                     (StringReader. source)
+                     (cond
+                       (fn? from)     (from)
+                       (string? from) (StringReader. from)))
+          consumer (doto
+                     (SyndFeedInput. validate locale)
+                     (.setAllowDoctypes allow-doctypes)
+                     (.setXmlHealerOn xml-healer-on))]
+      (feed->clj (.build consumer from)))))
 
 
 (defn- http-reader
@@ -61,10 +61,10 @@
     :or   {default-encoding "US-ASCII"
            lenient          true}}]
   (condp instance? from
-     String      (XmlReader. (.openConnection (URL. from)) headers)
-     URL         (XmlReader. (.openConnection from) headers)
-     File        (XmlReader. from)
-     InputStream (XmlReader. from (:content-type headers) lenient default-encoding)))
+    String      (XmlReader. (.openConnection (URL. from)) headers)
+    URL         (XmlReader. (.openConnection from) headers)
+    File        (XmlReader. from)
+    InputStream (XmlReader. from (:content-type headers) lenient default-encoding)))
 
 
 (defn consume-http [request]
@@ -88,16 +88,16 @@
            pretty-print    true
            throw-exception false}}]
   (with-exception throw-exception
-                  (let [feed     (if (nil? feed) feed-as-arg feed)
-                        feed     (clj->feed feed)
-                        producer (SyndFeedOutput.)]
-                    (cond
-                      (= :string to) (.outputString producer feed pretty-print)
-                      (= :w3cdom to) (.outputW3CDom producer feed)
-                      (= :jdom to) (.outputJDom producer feed)
-                      (string? to) (.output producer feed (File. to) pretty-print)
-                      (or (instance? File to)
-                          (instance? Writer to)) (.output producer feed to pretty-print)))))
+    (let [feed     (if (nil? feed) feed-as-arg feed)
+          feed     (clj->feed feed)
+          producer (SyndFeedOutput.)]
+      (cond
+        (= :string to) (.outputString producer feed pretty-print)
+        (= :w3cdom to) (.outputW3CDom producer feed)
+        (= :jdom to) (.outputJDom producer feed)
+        (string? to) (.output producer feed (File. to) pretty-print)
+        (or (instance? File to)
+            (instance? Writer to)) (.output producer feed to pretty-print)))))
 
 
 ;; Utilities
@@ -130,7 +130,7 @@
                  (fn [s k v]
                    (let [v' (shrink v)]
                      (cond-> s
-                             v' (assoc k v'))))
+                       v' (assoc k v'))))
                  (empty x)
                  x))
 

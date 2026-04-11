@@ -1,0 +1,7 @@
+{:align-form-columns?             true
+ :align-map-columns?              true
+ :function-arguments-indentation  :cursive
+ :sort-ns-references?             true
+ :normalize-newlines-at-file-end? true
+ :remove-consecutive-blank-lines? false
+ :paths                           ["project.clj" "src" "test"]}

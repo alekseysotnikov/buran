@@ -5,8 +5,8 @@
   (:import [java.io ByteArrayInputStream File]))
 
 
-(def short-feed {:info   {:feed-type "atom_1.0"
-                          :title     "Feed title"}
+(def short-feed {:info    {:feed-type "atom_1.0"
+                           :title     "Feed title"}
                  :entries [{:title       "Entry title"
                             :description {:value "entry description"}}]})
 
@@ -77,12 +77,12 @@
                       :title       "Entry title"}
                      {:description {:value "entry description 2"}
                       :title       "Entry title 2"})}
-         (combine-feeds {:info   {:feed-type "atom_1.0"
-                                  :title     "Feed title"}
+         (combine-feeds {:info    {:feed-type "atom_1.0"
+                                   :title     "Feed title"}
                          :entries [{:title       "Entry title"
                                     :description {:value "entry description"}}]}
-                        {:info   {:feed-type "atom_1.0"
-                                  :title     "Feed title 2"}
+                        {:info    {:feed-type "atom_1.0"
+                                   :title     "Feed title 2"}
                          :entries [{:title       "Entry title 2"
                                     :description {:value "entry description 2"}}]}))))
 
