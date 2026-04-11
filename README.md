@@ -1,7 +1,9 @@
 ![](pic/buran.png)
+
 > Buran (meaning "Snowstorm" or "Blizzard") was the first spaceplane to be produced as part of the Soviet/Russian Buran programme. [Wikipedia](https://en.wikipedia.org/wiki/Buran_(spacecraft))
 
-# Buran
+# Buran 🌀
+**Parse and generate RSS/Atom feeds in Clojure**
 
 [![Clojars Project](https://img.shields.io/clojars/v/buran.svg)](https://clojars.org/buran)
 [![CircleCI](https://circleci.com/gh/alekseysotnikov/buran.svg?style=shield)](https://circleci.com/gh/alekseysotnikov/buran)
@@ -9,26 +11,29 @@
 [![CodeScene System Mastery](https://codescene.io/projects/9187/status-badges/system-mastery)](https://codescene.io/projects/9187)
 [![CodeScene Code Health](https://codescene.io/projects/9187/status-badges/code-health)](https://codescene.io/projects/9187)
 
-Buran is a library designed to consume and produce any RSS/Atom feeds using a data-driven approach. It works as a [ROME](https://rometools.github.io/rome/) wrapper, but in Buran, feeds are represented as data structures.
+Buran is a bidirectional feed library: parse any RSS/Atom feed into Clojure data structures, transform them with standard functions, and produce feeds in any format. Built on [ROME Tools](https://rometools.github.io/rome/) with a data-driven approach.
 
 Buran can be used as an aggregator for various feed formats, converting them into regular Clojure data structures. When consuming a feed, Buran creates a map, which can be read or manipulated using regular functions such as ```filter```, ```sort```, ```assoc```, ```dissoc```, and more. After the modifications, Buran can generate your own feed, for example, in a different format (RSS 2.0, 1.0, 0.9x or Atom 1.0, 0.3).
 
-
-### Installation
-
-1. Add to *project.clj* - ```[buran "0.1.4"]```
-
-2. Import 
-
-in your namespace
-```clojure
-(:require [buran.core :refer [consume consume-http produce combine-feeds filter-entries sort-entries-by shrink]])
-```
-or REPL
+## Quick Start
 ````clojure
-(require '[buran.core :refer [consume consume-http produce combine-feeds filter-entries sort-entries-by shrink]])
-````
+;; Add to deps.edn
+{:deps {buran/buran {:mvn/version "0.1.4"}}}
 
+;; Or to project.clj
+[buran "0.1.4"]
+
+;; In your namespace
+(ns your.app
+  (:require [buran.core :as buran]))
+
+;; Parse a feed
+(def data (buran/consume-http "https://stackoverflow.com/feeds/tag?tagnames=clojure"))
+
+;; Generate a feed
+(buran/produce {:info {:feed-type "atom_1.0" :title "My Feed"}
+                :entries [{:title "Hello" :description {:value "World"}}]})
+````
 ## Usage
 
 Regardless of the feed format you are working with and whether you want to consume or produce a new feed, Buran uses the same data structure every time. Buran's API is concise, with functions such as `consume`, `consume-http`, `produce`, and some helpers to manipulate feeds, including `combine-feeds`, `filter-entries`, `sort-entries-by` and `shrink`. The basic workflow involves passing the data structure to the API functions repeatedly. See the documentation for [Various options](#various-options) and details.
@@ -122,10 +127,26 @@ Shrink a feed (remove nils, empty colls, maps and etc.)
                      :length 0}]}, ...],
  :foreign-markup [...]}
 ```
-### Various options
+### Supported Formats
+      
+| Format   | Parse | Generate | Notes        |
+|----------|-------|----------|--------------|
+| Atom 1.0 |   ✅  | ✅       | Full support |
+| Atom 0.3 |   ✅  | ✅       | Legacy       |
+| RSS 2.0  |   ✅  | ✅       | Most common  |
+| RSS 1.0  |   ✅  | ✅       | RDF-based    |
+| RSS 0.9x |   ✅  | ✅       | Various variants |
+| RSS 0.9  |   ✅  | ✅       | Original     |
 
-#### Consume feed
+### Basic API Reference
+#### `consume`
+Parse a feed from string, file, reader, or other sources.
+
 ````clojure
+;; Shortcut
+(consume "<?xml version=\"1.0\"?><feed>...</feed>")
+
+;; With options
 (consume {:from             (java.io.File. "~/feed.xml") 
                                         ; String, File, Reader, W3C DOM document, JDOM document, W3C SAX InputSource
           :validate         false       ; Indicates if the input should be validated
@@ -137,7 +158,23 @@ Shrink a feed (remove nils, empty colls, maps and etc.)
           :throw-exception  false       ; false - return map with an exception, throw an exception otherwise
          })
 ````
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `:from` | String, File, Reader, InputStream, W3C DOM, JDOM, SAX InputSource | **required** | Source to parse |
+| `:validate` | boolean | `false` | Validate XML against DTD/schema |
+| `:locale` | `java.util.Locale` | `(Locale/US)` | Locale for parsing |
+| `:xml-healer-on` | boolean | `true` | Trim whitespace/comments before XML prolog; resolve HTML entities |
+| `:allow-doctypes` | boolean | `false` | Allow DOCTYPE declarations (⚠️ security risk - only for trusted sources) |
+| `:throw-exception` | boolean | `false` | If `false`, return error map; if `true`, throw exception |
+
+#### `consume-http`
+Fetch and parse a feed over HTTP.
+
 ````clojure
+;; Shortcut
+(consume-http "https://example.com/feed.xml")
+
+;; With options
 (consume-http {:from             "https://stackoverflow.com/feeds/tag?tagnames=clojure" 
                                                       ; <http url string>, URL, File, InputStream
                :headers          {"X-Header" "Value"} ; Request's HTTP headers map
@@ -147,12 +184,23 @@ Shrink a feed (remove nils, empty colls, maps and etc.)
                + All options applied to a (consume) call.
               })
 ````
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `:from` | String URL, `java.net.URL`, File, InputStream | **required** | URL or source to fetch |
+| `:headers` | map | `{}` | HTTP headers (e.g., `{"User-Agent" "MyApp"}`) |
+| `:lenient` | boolean | `true` | Relaxed charset encoding detection |
+| `:default-encoding` | String | `"US-ASCII"` | Fallback encoding: `UTF-8`, `UTF-16`, `UTF-16BE`, `UTF-16LE`, `CP1047`, `US-ASCII` |
+| `:content-type` | String | `nil` | Override Content-Type header (used with InputStream) |
+
 *Beware!* ```consume-http``` from either http url string or URL is rudimentary and works only for simplest cases. For instance, it does not follow HTTP 302 redirects.
 Please consider using a separate library like [clj-http](https://github.com/dakrone/clj-http) or [http-kit](http://www.http-kit.org/client.html) for fetching the feed.
 
 
 
-#### Produce feed
+#### `produce`
+Generate RSS/Atom feed as string, file, or DOM.
+
 ````clojure
 (produce {:feed            {:info {:feed-type "atom_1.0" ; Supports: atom_1.0, atom_0.3, rss_2.0, 
                                                          ; rss_1.0, rss_0.94, rss_0.93, rss_0.92, 
@@ -168,9 +216,21 @@ Please consider using a separate library like [clj-http](https://github.com/dakr
           :throw-exception false   ; false - return map with an exception, throw an exception otherwise
          })
 ````
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `:feed` | map | `nil` (uses argument as feed) | Feed data structure to generate |
+| `:to` | `:string`, `:w3cdom`, `:jdom`, String (file path), File, Writer | `:string` | Output destination |
+| `:pretty-print` | boolean | `true` | Pretty-print XML output |
+| `:throw-exception` | boolean | `false` | If `false`, return error map; if `true`, throw exception |
+
+#### `shrink`
+Remove nil values and empty collections from feed data.
+```clojure
+(shrink feed)
+```
 
 ## License
 
-Copyright © 2018-2023 Aleksei Sotnikov
+Copyright © 2018-2026 Aleksei Sotnikov
 
-Distributed under the Apache License 2.0
+Distributed under the MIT License
